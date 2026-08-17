@@ -1,0 +1,22 @@
+# CUDA GROMACS for linux-64 NVIDIA hosts (not Apple Silicon).
+# conda-forge build: gromacs-2025.4-nompi_cuda_* (requires CUDA toolkit 12.9).
+name: gromacs
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - gromacs=2025.4=nompi_cuda*
+  - matplotlib
+  - nglview=3.1.1
+  - mdtraj
+  - openmm
+  - pdbfixer
+  - notebook
+  - nbconvert
+  - numpy
+  - requests
+  - pandas
+  - seaborn
+  - compilers
+  - openmpi
+  - cmake

@@ -1,0 +1,15 @@
+[INFO   ] Starting gmx_MMPBSA v1.5.0.3
+[DEBUG  ] WDIR          : /workspace/notebooks
+[DEBUG  ] AMBERHOME     : 
+[DEBUG  ] PYTHON EXE    : /opt/conda/envs/gromacs/bin/python
+[DEBUG  ] PYTHON VERSION: 3.11.15 | packaged by conda-forge | (main, Aug 11 2026, 10:16:23) [GCC 14.4.0]
+[DEBUG  ] MPI           : /opt/conda/envs/gromacs/bin/mpirun
+[DEBUG  ] ParmEd        : 4.3.1
+[DEBUG  ] OS PLATFORM   : Linux-6.12.76-linuxkit-aarch64-with-glibc2.31
+[DEBUG  ] OS SYSTEM     : Linux
+[DEBUG  ] OS VERSION    : #1 SMP Mon Jul 27 16:56:11 UTC 2026
+[DEBUG  ] OS PROCESSOR  : aarch64
+
+[INFO   ] Command-line
+  gmx_MMPBSA -h
+

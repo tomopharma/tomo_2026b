@@ -1,0 +1,23 @@
+# GROMACS molecular dynamics with CUDA (linux/amd64 + NVIDIA GPU).
+# Build on a machine that can emit linux/amd64; run with NVIDIA Container Toolkit.
+# Same Jupyter entrypoint as the CPU image (start.sh).
+FROM --platform=linux/amd64 condaforge/mambaforge:latest
+
+WORKDIR /workspace/notebooks
+
+# Conda's __cuda virtual package is absent at image-build time (no GPU in the
+# builder). Override so the nompi_cuda GROMACS build can be solved.
+ENV CONDA_OVERRIDE_CUDA=12.9
+
+COPY environment-gpu.yml .
+RUN mamba env create -f environment-gpu.yml && mamba clean -afy
+
+ENV PATH="/opt/conda/envs/gromacs/bin:$PATH"
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
+
+COPY jupyter_notebook_config.py start.sh /opt/tomo/
+RUN chmod +x /opt/tomo/start.sh
+
+EXPOSE 8888
+CMD ["/opt/tomo/start.sh"]

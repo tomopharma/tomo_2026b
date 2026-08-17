@@ -1,0 +1,14 @@
+# Docking and MD data stay on disk only (see root .gitignore: md/data/).
+data/
+
+# Large MD outputs (also ignored if data/ is not fully ignored)
+data/md_calx_3qqu/*.xtc
+data/md_calx_3qqu/*.gro
+data/md_calx_3qqu/*.edr
+data/md_calx_3qqu/*.cpt
+data/md_calx_3qqu/#*
+data/runs/
+
+.ipynb_checkpoints/
+__pycache__/
+.DS_Store
