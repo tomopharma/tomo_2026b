@@ -3,9 +3,7 @@
 # Same Jupyter entrypoint as the CPU image (start.sh).
 FROM --platform=linux/amd64 condaforge/mambaforge:latest
 
-# Do not use /workspace/* here: gcsfuse bind-mounts /workspace and Docker would create
-# an empty notebooks/ folder at the user's Files home root on every session start.
-WORKDIR /opt/tomo
+WORKDIR /workspace/notebooks
 
 # Conda's __cuda virtual package is absent at image-build time (no GPU in the
 # builder). Override so the nompi_cuda GROMACS build can be solved.
