@@ -21,6 +21,9 @@ venv/
 .idea/
 .vscode/
 
+# Claude Code (local worktrees and settings)
+.claude/
+
 # GROMACS / editor backups
 \#*\#
 
