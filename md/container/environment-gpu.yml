@@ -11,6 +11,7 @@ dependencies:
   - mdtraj
   - openmm
   - pdbfixer
+  - propka
   - notebook
   - nbconvert
   - numpy
