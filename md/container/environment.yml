@@ -4,6 +4,8 @@ channels:
   - defaults
 dependencies:
   - gromacs=2025.4=nompi*
+  # PROPKA 3.5.1 crashes on Python 3.14 (reads self.__annotations__, changed in 3.14).
+  - python=3.12
   - matplotlib
   - nglview=3.1.1
   - mdtraj
