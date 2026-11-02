@@ -96,7 +96,7 @@ def main() -> None:
     if "TODO" in json.dumps(metadata):
         sys.exit(f"{args.metadata} still contains TODO placeholders (creators, affiliations)")
 
-    host = HOSTS[args.sandbox]
+    host = os.environ.get("ZENODO_HOST") or HOSTS[args.sandbox]  # ZENODO_HOST: tests against a local mock
     state_path = args.stage / ("zenodo_state_sandbox.json" if args.sandbox else "zenodo_state.json")
     state = json.loads(state_path.read_text()) if state_path.is_file() else {}
     total_gb = sum(p.stat().st_size for p in files) / 1e9
@@ -111,7 +111,8 @@ def main() -> None:
     draft = zenodo.get_draft(state["id"]) if state.get("id") else zenodo.create_draft()
     if draft.get("submitted"):
         sys.exit(f"Deposition {draft['id']} is already published; start a new version on the web page instead")
-    doi = draft["metadata"].get("prereserve_doi", {}).get("doi")
+    reserved = draft["metadata"].get("prereserve_doi")  # {"doi": …} once reserved; may echo back as True
+    doi = reserved.get("doi") if isinstance(reserved, dict) else state.get("doi")
     state.update(id=draft["id"], doi=doi, url=draft["links"]["html"])
     state_path.write_text(json.dumps(state, indent=1) + "\n")
 
