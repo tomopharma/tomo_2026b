@@ -3,8 +3,8 @@
 Tools to publish the MD data (replicates 1–3) as one Zenodo record. `deposit_README.md` becomes the
 record's README; `metadata.json` is the record's metadata.
 
-1. **Metadata.** Replace the `TODO` creators in `metadata.json` (name as "Family, Given", affiliation,
-   optional ORCID). The upload script refuses to run while any `TODO` remains.
+1. **Metadata.** Check the creators in `metadata.json` (name as "Family, Given"; `affiliation` and
+   `orcid` optional). The upload script refuses to run while any `TODO` remains.
 2. **Build.** `gcloud auth login`, then `./build_deposit.sh`. It downloads from Cloud Storage into
    `~/zenodo_tomo_2026b` (about 23 GB free needed; set `STAGE` to change it) and writes the upload
    set, `README.md` and `MANIFEST.sha256` to `~/zenodo_tomo_2026b/upload`.
