@@ -12,3 +12,6 @@ data/runs/
 .ipynb_checkpoints/
 __pycache__/
 .DS_Store
+
+# Site-specific settings for deploy-to-gcp.sh and zenodo/build_deposit.sh (project IDs, buckets)
+.local.env

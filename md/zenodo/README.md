@@ -16,3 +16,18 @@ record's README; `metadata.json` is the record's metadata.
    sets the metadata. It prints the DOI and the draft's web address.
 6. **Publish** on the Zenodo web page after checking the draft. Publishing cannot be undone; later
    corrections become a new version with its own DOI.
+
+## New version (code changes only)
+
+The data files carry over from the published record; only `code.zip`, `README.md` and
+`MANIFEST.sha256` are replaced.
+
+1. Bump `version` in `metadata.json` and describe the change under "Versions" in `deposit_README.md`.
+2. `./new_version.sh <record id>`: stages the three files in `~/zenodo_tomo_2026b_new/upload`,
+   reusing the published checksums for the unchanged data files.
+3. `python zenodo_upload.py --stage ~/zenodo_tomo_2026b_new --new-version-of <record id>`: creates the
+   new-version draft, replaces the three files and sets the metadata. It prints the new DOI.
+4. Publish on the Zenodo web page.
+
+Site-specific settings (`GCS_HOME`, cloud project and repository names) go in `md/.local.env`, which is
+not version-controlled.

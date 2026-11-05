@@ -2,11 +2,20 @@
   "upload_type": "dataset",
   "title": "Molecular dynamics and MM-GBSA data: calx-β domain of integrin β4 bound to the IGF1R kinase domain (PDB 3QQU)",
   "creators": [
-    {"name": "Takada, Yoko K.", "affiliation": "University of California Davis School of Medicine"},
-    {"name": "Sarno, Adrian", "affiliation": "Tomo Pharmacometrics Consulting Services, LLC"},
-    {"name": "Takada, Yoshikazu", "affiliation": "University of California Davis School of Medicine"}
+    {
+      "name": "Takada, Yoko K.",
+      "affiliation": "University of California Davis School of Medicine"
+    },
+    {
+      "name": "Sarno, Adrian",
+      "affiliation": "Tomo Pharmacometrics Consulting Services, LLC"
+    },
+    {
+      "name": "Takada, Yoshikazu",
+      "affiliation": "University of California Davis School of Medicine"
+    }
   ],
-  "description": "<p>Simulation inputs, trajectories and analysis behind the molecular dynamics supplement of a manuscript submitted to <em>Biomolecules</em> (MDPI) on calx-β binding to the IGF1R kinase.</p><p>Three independent 100 ns replicates (velocity seeds 1001–1003) of the docked calx-β domain (integrin β4 residues 989–1107) on the full IGF1R kinase domain from PDB 3QQU (missing loop 1094–1103 capped), AMBER99SB-ILDN / TIP3P, 0.15 M NaCl, GROMACS 2025.4. MM-GBSA (gmx_MMPBSA 1.7.1; GBn2 primary, OBC-II sensitivity) and computational alanine scanning of the 3A mutant (K1020A/D1021A/E1022A) with three far-field controls.</p><p>See README.md for the file layout and MANIFEST.sha256 for checksums. The notebooks in code.zip reproduce every step.</p>",
+  "description": "<p>Simulation inputs, trajectories and analysis behind the molecular dynamics supplement of a manuscript submitted to <em>Biomolecules</em> (MDPI) on calx-β binding to the IGF1R kinase.</p><p>Three independent 100 ns replicates (velocity seeds 1001–1003) of the docked calx-β domain (integrin β4 residues 989–1107) on the full IGF1R kinase domain from PDB 3QQU (missing loop 1094–1103 capped), AMBER99SB-ILDN / TIP3P, 0.15 M NaCl, GROMACS 2025.4. MM-GBSA (gmx_MMPBSA 1.7.1; GBn2 primary, OBC-II sensitivity) and computational alanine scanning of the 3A mutant (K1020A/D1021A/E1022A) with three far-field controls.</p><p>See README.md for the file layout and MANIFEST.sha256 for checksums. code.zip holds the complete analysis code (notebooks with outputs, figure script, containers), which reproduces every step.</p>",
   "access_right": "open",
   "license": "cc-by-4.0",
   "keywords": [
@@ -19,7 +28,7 @@
     "GROMACS",
     "gmx_MMPBSA"
   ],
-  "version": "1.0",
+  "version": "1.1",
   "language": "eng",
   "notes": "Software: GROMACS 2025.4 (CUDA), PROPKA 3.5.1, PDBFixer 1.12.0 / OpenMM 8.6.1, MDTraj 1.11.2, gmx_MMPBSA 1.7.1, AmberTools 24.8, ParmEd 4.3.1, Python 3.12."
 }
