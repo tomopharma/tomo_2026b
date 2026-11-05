@@ -5,18 +5,23 @@ Usage:
     python zenodo_upload.py --dry-run                 # show what would happen
     python zenodo_upload.py --sandbox                 # rehearse on sandbox.zenodo.org
     python zenodo_upload.py                           # create (or resume) the real draft
+    python zenodo_upload.py --stage ~/zenodo_tomo_2026b_new --new-version-of 23966851
+                                                      # new version: replace the staged files only
 
 The token is read from $ZENODO_TOKEN or ~/.config/zenodo/token (one line; chmod 600). It needs the
 scopes deposit:write and deposit:actions. A sandbox token comes from sandbox.zenodo.org and only
 works there.
 
 The first run creates a draft with a reserved DOI and records its id in <stage>/zenodo_state.json;
-later runs resume that draft and skip files already uploaded with the same MD5. Publishing is a
-manual step on the Zenodo web page, because a published record cannot be deleted.
+later runs resume that draft and skip files already uploaded with the same MD5. With --new-version-of,
+the draft is a new version of a published record: it starts with that record's files, and only the
+staged files (new_version.sh) replace their namesakes. Publishing is a manual step on the Zenodo web
+page, because a published record cannot be deleted.
 """
 from __future__ import annotations
 
 import argparse
+import datetime
 import hashlib
 import json
 import os
@@ -62,6 +67,18 @@ class Zenodo:
     def create_draft(self) -> dict:
         return self.call("POST", f"{self.api}/deposit/depositions", json={"metadata": {"prereserve_doi": True}})
 
+    def new_version(self, record_id: int) -> dict:
+        """Draft of a new version of a published record, holding copies of its files."""
+        made = self.call("POST", f"{self.api}/deposit/depositions/{record_id}/actions/newversion")
+        return self.call("GET", made["links"]["latest_draft"])
+
+    def delete_files(self, dep_id: int, names: set[str], keep_md5: dict[str, str]) -> None:
+        """Remove draft files that the upload replaces (same name, different content)."""
+        for f in self.call("GET", f"{self.api}/deposit/depositions/{dep_id}/files"):
+            if f["filename"] in names and keep_md5.get(f["filename"]) != f.get("checksum"):
+                self.call("DELETE", f"{self.api}/deposit/depositions/{dep_id}/files/{f['id']}")
+                print(f"  delete {f['filename']} (replaced in this version)")
+
     def get_draft(self, dep_id: int) -> dict:
         return self.call("GET", f"{self.api}/deposit/depositions/{dep_id}")
 
@@ -84,6 +101,8 @@ def main() -> None:
     parser.add_argument("--metadata", type=Path, default=HERE / "metadata.json")
     parser.add_argument("--sandbox", action="store_true", help="use sandbox.zenodo.org (test records)")
     parser.add_argument("--dry-run", action="store_true", help="check inputs and print the plan; no network calls")
+    parser.add_argument("--new-version-of", type=int, metavar="RECORD_ID",
+                        help="make the draft a new version of this published record (files carry over)")
     args = parser.parse_args()
 
     upload_dir = args.stage / "upload"
@@ -101,14 +120,20 @@ def main() -> None:
     state = json.loads(state_path.read_text()) if state_path.is_file() else {}
     total_gb = sum(p.stat().st_size for p in files) / 1e9
     print(f"{host}: {len(files)} files, {total_gb:.1f} GB from {upload_dir}")
-    print(f"Draft: {'resume ' + str(state['id']) if state.get('id') else 'create new (DOI reserved)'}")
+    action = f"new version of {args.new_version_of}" if args.new_version_of else "create new"
+    print(f"Draft: {'resume ' + str(state['id']) if state.get('id') else action + ' (DOI reserved)'}")
     if args.dry_run:
         for p in files:
             print(f"  {p.stat().st_size / 1e6:10.1f} MB  {p.name}")
         return
 
     zenodo = Zenodo(host, read_token())
-    draft = zenodo.get_draft(state["id"]) if state.get("id") else zenodo.create_draft()
+    if state.get("id"):
+        draft = zenodo.get_draft(state["id"])
+    elif args.new_version_of:
+        draft = zenodo.new_version(args.new_version_of)
+    else:
+        draft = zenodo.create_draft()
     if draft.get("submitted"):
         sys.exit(f"Deposition {draft['id']} is already published; start a new version on the web page instead")
     reserved = draft["metadata"].get("prereserve_doi")  # {"doi": …} once reserved; may echo back as True
@@ -117,6 +142,8 @@ def main() -> None:
     state_path.write_text(json.dumps(state, indent=1) + "\n")
 
     bucket = draft["links"]["bucket"]
+    if args.new_version_of:
+        zenodo.delete_files(draft["id"], {p.name for p in files}, {p.name: md5(p) for p in files})
     present = zenodo.bucket_files(bucket)
     for p in files:
         if p.name in present and present[p.name] == md5(p):
@@ -127,7 +154,14 @@ def main() -> None:
         if result.get("checksum", "").removeprefix("md5:") != md5(p):
             sys.exit(f"Checksum mismatch after uploading {p.name}; rerun to retry")
 
-    zenodo.set_metadata(draft["id"], {**metadata, "prereserve_doi": True})  # keep the reserved DOI
+    if args.new_version_of:
+        metadata = {**metadata, "publication_date": datetime.date.today().isoformat()}
+    updated = zenodo.set_metadata(draft["id"], {**metadata, "prereserve_doi": True})  # keep the reserved DOI
+    reserved = updated.get("metadata", {}).get("prereserve_doi")
+    if isinstance(reserved, dict) and reserved.get("doi"):
+        doi = reserved["doi"]
+        state["doi"] = doi
+        state_path.write_text(json.dumps(state, indent=1) + "\n")
     print(f"\nDraft ready, NOT published.\n  DOI (reserved): {doi}\n  Review and publish: {state['url']}")
 
 

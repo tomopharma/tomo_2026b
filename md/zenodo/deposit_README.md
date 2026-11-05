@@ -20,7 +20,7 @@ submitted to *Biomolecules* (MDPI).
 | --- | --- |
 | `README.md` | This file |
 | `MANIFEST.sha256` | SHA-256 checksum of every other file (`shasum -a 256 -c MANIFEST.sha256`) |
-| `code.zip` | Notebooks md1 (system build and MD), md2 (MM-GBSA), md3 (binding inspection); container definitions; `COMMIT.txt` = repository commit |
+| `code.zip` | The complete analysis code: notebooks md1 (system build and MD), md2 (MM-GBSA) and md3 (binding inspection) with HTML exports (md2 and md3 with their outputs); the Figure 2 script and files (`md/figures`); container definitions and run scripts; this deposit kit (`md/zenodo`). `COMMIT.txt` = repository commit |
 | `inputs.zip` | Docking inputs: `3QQU.pdbqs` (receptor) and `calxbeta_18.39.pdb` (docked calx-β pose) |
 | `system_build.zip` | `system_summary.json` (build facts: caps, charge, ions, box, minimization), `protonation_states.csv` (PROPKA at pH 7.4), `ligand_calxbeta_chainB.pdb` |
 | `rep{1,2,3}_md_full.xtc` | Full 100 ns production trajectory, all atoms, every 10 ps (about 3.6 GB each) |
@@ -47,6 +47,13 @@ submitted to *Biomolecules* (MDPI).
   original file was lost. It reproduces the recorded build exactly (same caps, the same two
   non-standard residues GLU1115 → GLH and ASP1191 → ASH, the same 59 interface residues).
 - The solvated box before minimization is not included; each `md.tpr` contains the full system.
+
+## Versions
+
+- **1.1:** `code.zip` is now the complete analysis code at the final commit, including md2 and md3 saved with
+  their outputs and the Figure 2 script. Site-specific settings (cloud project and bucket names) are
+  placeholders. All data files are unchanged from 1.0.
+- **1.0:** first release.
 
 ## Licence
 

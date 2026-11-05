@@ -7,7 +7,7 @@
 #
 # Environment (defaults shown):
 #   STAGE      staging folder; needs about 23 GB free (downloads + archives)
-#   GCS_HOME   gs://ephemeralvm02-ephemeral-work/users/usr_00a477d6/home  (the Ephemeral VM's /workspace)
+#   GCS_HOME   the Cloud Storage folder behind the VM's /workspace; set it here or in md/.local.env
 #   DATA_DIR   md/data of the main checkout (docking inputs; gitignored, so not in this worktree)
 #   REPS       "1 2 3"
 #
@@ -26,7 +26,9 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(git -C "$HERE" rev-parse --show-toplevel)"
 MAIN_CHECKOUT="$(git -C "$HERE" worktree list --porcelain | awk '/^worktree /{print $2; exit}')"
 STAGE="${STAGE:-$HOME/zenodo_tomo_2026b}"
-GCS_HOME="${GCS_HOME:-gs://ephemeralvm02-ephemeral-work/users/usr_00a477d6/home}"
+# shellcheck disable=SC1091
+[[ -f "$HERE/../.local.env" ]] && source "$HERE/../.local.env"
+GCS_HOME="${GCS_HOME:-gs://your-bucket/your-home}"
 DATA_DIR="${DATA_DIR:-$MAIN_CHECKOUT/md/data}"
 REPS="${REPS:-1 2 3}"
 
@@ -36,6 +38,7 @@ SI="$GCS_HOME/md_results/tomo_2026b/si"
 RAW="$STAGE/raw"
 OUT="$STAGE/upload"
 
+[[ "$GCS_HOME" != gs://your-bucket/* ]] || { echo "Set GCS_HOME (or put it in md/.local.env)" >&2; exit 1; }
 for tool in gcloud zip shasum git; do
   command -v "$tool" >/dev/null || { echo "Missing tool: $tool" >&2; exit 1; }
 done
@@ -63,16 +66,9 @@ zip_dir() {  # zip_dir <archive> <folder> <entries…>: archive entries relative
   (cd "$dir" && zip -q -r -X "$OUT/$archive" "$@")
 }
 
-# --- Code: notebooks and container definitions at HEAD ---
+# --- Code: the whole repository at HEAD (the record is its only public copy) ---
 COMMIT="$(git -C "$REPO" rev-parse HEAD)"
-rm -f "$OUT/code.zip"
-git -C "$REPO" archive --format=zip --prefix=tomo_2026b/ -o "$OUT/code.zip" HEAD \
-  md/notebooks/md1_igf1r3qqu_calxbeta_gromacs.ipynb \
-  md/notebooks/md2_igf1r3qqu_calxbeta_pbsa_gbsa.ipynb \
-  md/notebooks/md3_igf1r3qqu_calxbeta_binding_inspection.ipynb \
-  md/container md/docker-compose.yml md/zenodo
-echo "$COMMIT" > "$RAW/COMMIT.txt"
-(cd "$RAW" && zip -q -X "$OUT/code.zip" COMMIT.txt)
+"$HERE/code_zip.sh" "$OUT/code.zip"
 
 # --- Docking inputs ---
 rm -f "$OUT/inputs.zip"

@@ -7,10 +7,12 @@
 #   ./deploy-to-gcp.sh --gpu           # builds container/Dockerfile.gpu (CUDA) for the Ephemeral VM
 #   ./deploy-to-gcp.sh --gpu container
 #
-# Environment (defaults shown as CPU / --gpu):
-#   PROJECT_ID   GCP project            (tomopharma / ephemeralvm02)
+# Environment (defaults shown as CPU / --gpu). Site-specific values (project, repository) live in
+# md/.local.env (ignored by version control), e.g. PROJECT_ID_CPU=… PROJECT_ID_GPU=… ART_REPO_CPU=…
+# ART_REPO_GPU=…; without it the placeholders below are used and the push fails until they are set.
+#   PROJECT_ID   GCP project            (your-cpu-project / your-gpu-project)
 #   REGION       Artifact Registry region (us-west1 / us-west1)
-#   ART_REPO     Repository in Artifact Registry (tomopharma / ephemeral-containers)
+#   ART_REPO     Repository in Artifact Registry (your-cpu-repo / your-gpu-repo)
 #   IMAGE        Image name in that repo (tomo_2026b_md / tomo-2026b-md-gpu)
 #   TAG          Tag to push            (latest / today's date, e.g. 2026-10-27)
 #
@@ -38,17 +40,19 @@ done
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
+# shellcheck disable=SC1091
+[[ -f .local.env ]] && source .local.env
 
 if [[ "$GPU" == true ]]; then
   DOCKERFILE="${SUBFOLDER}/Dockerfile.gpu"
-  PROJECT_ID="${PROJECT_ID:-ephemeralvm02}"
-  ART_REPO="${ART_REPO:-ephemeral-containers}"
+  PROJECT_ID="${PROJECT_ID:-${PROJECT_ID_GPU:-your-gpu-project}}"
+  ART_REPO="${ART_REPO:-${ART_REPO_GPU:-your-gpu-repo}}"
   IMAGE="${IMAGE:-tomo-2026b-md-gpu}"
   TAG="${TAG:-$(date +%Y-%m-%d)}"
 else
   DOCKERFILE="${SUBFOLDER}/Dockerfile"
-  PROJECT_ID="${PROJECT_ID:-tomopharma}"
-  ART_REPO="${ART_REPO:-tomopharma}"
+  PROJECT_ID="${PROJECT_ID:-${PROJECT_ID_CPU:-your-cpu-project}}"
+  ART_REPO="${ART_REPO:-${ART_REPO_CPU:-your-cpu-repo}}"
   IMAGE="${IMAGE:-tomo_2026b_md}"
   TAG="${TAG:-latest}"
 fi
