@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Figure 2c: calx-β RMSD from the docked pose and fraction of docked contacts (Q) over 100 ns.
+"""Figure 2: (a) calx-β RMSD from the docked pose and (b) fraction of docked contacts (Q) over 100 ns.
 
 Reads md1's per-frame binding metrics (rep{n}/md_binding_metrics.csv) and plots 2 ns block
 averages for every replicate, replicate 2 highlighted, as in the SI binding-geometry chart (S5).
 
 Usage:
-    python fig2c_binding_geometry.py --metrics-dir ../data/md_calx_3qqu_full --out-dir out/
+    python fig2_md_binding_geometry.py --metrics-dir ../data/md_calx_3qqu_full --out-dir fig2/
 
-Writes fig2c_binding_geometry.{pdf,svg} (vector) and .{png,tif} (600 dpi) in --out-dir.
+Writes fig2_md_binding_geometry.{pdf,svg} (vector) and .{png,tif} (600 dpi) in --out-dir.
 """
 from __future__ import annotations
 
@@ -48,7 +48,8 @@ def main() -> None:
     parser.add_argument("--metrics-dir", type=Path, required=True, help="folder holding rep1/, rep2/, rep3/")
     parser.add_argument("--out-dir", type=Path, default=Path("."))
     parser.add_argument("--reps", type=int, nargs="+", default=[1, 2, 3])
-    parser.add_argument("--label", default="c", help="panel letter; empty string for none")
+    parser.add_argument("--panel-letters", nargs=2, default=["a", "b"], metavar=("RMSD", "Q"),
+                        help="letters for the two panels; pass '' '' for none")
     args = parser.parse_args()
 
     data = {r: block_means(args.metrics_dir / f"rep{r}" / "md_binding_metrics.csv") for r in args.reps}
@@ -62,8 +63,8 @@ def main() -> None:
         ax_r.plot(b["ns"], b["rmsd"], color=colour, alpha=alpha, lw=lw, label=f"Simulation {r}")
         ax_q.plot(b["ns"], b["q"], color=colour, alpha=alpha, lw=lw)
 
-    ax_r.set(ylim=(0, 1.6), ylabel="calx-β RMSD from docked pose (nm)")
-    ax_q.set(ylim=(0, 1.0), ylabel="Fraction of docked contacts kept (Q)")
+    ax_r.set(ylim=(0, 1.6), ylabel="calx-β RMSD from\ndocked pose (nm)")
+    ax_q.set(ylim=(0, 1.0), ylabel="Fraction of docked\ncontacts kept (Q)")
     for ax in (ax_r, ax_q):
         ax.set(xlim=(0, 100), xlabel="Time (ns)", xticks=range(0, 101, 25))
         ax.spines[["top", "right"]].set_visible(False)
@@ -73,12 +74,17 @@ def main() -> None:
     order = sorted(range(len(labels)), key=lambda i: labels[i])
     fig.legend([handles[i] for i in order], [labels[i] for i in order], loc="upper center",
                ncol=len(labels), frameon=False, bbox_to_anchor=(0.5, 1.0), handlelength=1.8)
-    if args.label:
-        fig.text(0.005, 0.98, args.label, fontsize=11, fontweight="bold", va="top")
-    fig.tight_layout(rect=(0.015, 0, 1, 0.9), w_pad=2.5)
+    fig.tight_layout(rect=(0.015, 0, 1, 0.84), w_pad=2.5)  # top strip holds the legend
+    # Panel letters above each plot and its y-axis label, aligned with the label's left edge.
+    renderer = fig.canvas.get_renderer()
+    for ax, letter in zip((ax_r, ax_q), args.panel_letters):
+        if letter:
+            box = ax.get_tightbbox(renderer).transformed(fig.transFigure.inverted())
+            top = max(box.y1, ax.get_position().y1) + 0.015
+            fig.text(max(box.x0, 0.0), top, letter, fontsize=11, fontweight="bold", va="bottom")
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
-    stem = args.out_dir / "fig2c_binding_geometry"
+    stem = args.out_dir / "fig2_md_binding_geometry"
     for ext in ("pdf", "svg"):
         fig.savefig(f"{stem}.{ext}")
     for ext in ("png", "tif"):
